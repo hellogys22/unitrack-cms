@@ -11,6 +11,7 @@ import {
   GraduationCap,
   Lock,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   UserCheck,
   Users,
@@ -147,7 +148,7 @@ export function LandingPortal({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-2.5 text-xs">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 font-medium text-blue-100">
               <BookOpen className="h-3.5 w-3.5" />
               {stats.courseCount} BCA Courses
@@ -156,6 +157,14 @@ export function LandingPortal({
               <Users className="h-3.5 w-3.5" />
               {stats.userCount} Demo Personas
             </span>
+            <a
+              href="/downloads/unitrack-cms.apk"
+              download="UniTrack-CMS.apk"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 font-semibold text-[#003366] shadow-xs transition-colors hover:bg-blue-50"
+            >
+              <Smartphone className="h-3.5 w-3.5 text-[#0055CC]" />
+              <span>Download Android APK</span>
+            </a>
             {currentUser && (
               <Link
                 href={currentHomePath}
