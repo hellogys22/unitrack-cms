@@ -1,0 +1,93 @@
+// UniTrack CMS - Choice-Based Credit System & Prerequisite-Aware Course Management System
+// Normalized 3NF PostgreSQL Schema via Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  FACULTY
+  STUDENT
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  COMPLETED
+  DROPPED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  enrollmentNo String?
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+
+  coursesTaught Course[]     @relation("FacultyCourses")
+  enrollments   Enrollment[]
+
+  @@index([role])
+}
+
+model Course {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  title          String
+  description    String
+  credits        Int
+  semester       Int
+  maxSeats       Int
+  prerequisiteId String?
+  facultyId      String
+  createdAt      DateTime @default(now())
+
+  prerequisite     Course?      @relation("CoursePrerequisite", fields: [prerequisiteId], references: [id], onDelete: SetNull)
+  dependentCourses Course[]     @relation("CoursePrerequisite")
+  faculty          User         @relation("FacultyCourses", fields: [facultyId], references: [id], onDelete: Restrict)
+  enrollments      Enrollment[]
+
+  @@index([prerequisiteId])
+  @@index([facultyId])
+  @@index([semester])
+}
+
+model Enrollment {
+  id            String           @id @default(cuid())
+  studentId     String
+  courseId      String
+  status        EnrollmentStatus @default(ENROLLED)
+  internalMarks Int?
+  enrolledAt    DateTime         @default(now())
+
+  student    User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course     Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  attendance Attendance[]
+
+  @@unique([studentId, courseId])
+  @@index([studentId, status])
+  @@index([courseId, status])
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  enrollmentId String
+  date         DateTime
+  status       AttendanceStatus
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, date])
+  @@index([enrollmentId])
+}
