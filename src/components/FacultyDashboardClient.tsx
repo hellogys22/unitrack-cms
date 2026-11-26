@@ -50,10 +50,9 @@ export interface FacultyCourseItem {
 }
 
 const FACULTY_NAV: NavItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: "dashboard" },
-  { id: "attendance", label: "Mark Attendance", icon: "attendance" },
+  { id: "attendance", label: "Attendance", icon: "attendance" },
   { id: "marks", label: "Internal Marks", icon: "marks" },
-  { id: "alerts", label: "Attendance Alerts", icon: "analytics" },
+  { id: "alerts", label: "Alerts & Capacity", icon: "analytics" },
 ];
 
 export function FacultyDashboardClient({
@@ -70,7 +69,7 @@ export function FacultyDashboardClient({
   const router = useRouter();
   const { showToast } = useToast();
   const [courses, setCourses] = useState<FacultyCourseItem[]>(initialCourses);
-  const [activeNav, setActiveNav] = useState<string>("dashboard");
+  const [activeNav, setActiveNav] = useState<string>("attendance");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState<string>(
     initialCourses.find((c) => c.students.length > 0)?.id ??
@@ -114,19 +113,16 @@ export function FacultyDashboardClient({
 
   function getCheckedForStudent(student: FacultyCourseStudent): boolean {
     const key = `${student.enrollmentId}:${sessionDate}`;
-    if (key in attendanceDraft) {
-      return attendanceDraft[key];
-    }
+    if (key in attendanceDraft) return attendanceDraft[key];
     const recorded = student.attendanceByDate[sessionDate];
-    if (recorded) {
-      return recorded === "PRESENT";
-    }
-    return true;
+    return recorded ? recorded === "PRESENT" : true;
   }
 
   function toggleStudentAttendance(enrollmentId: string, checked: boolean) {
-    const key = `${enrollmentId}:${sessionDate}`;
-    setAttendanceDraft((prev) => ({ ...prev, [key]: checked }));
+    setAttendanceDraft((prev) => ({
+      ...prev,
+      [`${enrollmentId}:${sessionDate}`]: checked,
+    }));
   }
 
   function markAllPresent(value: boolean) {
@@ -278,12 +274,7 @@ export function FacultyDashboardClient({
           )
         : null;
 
-    return {
-      totalCourses,
-      totalActiveEnrollments,
-      totalLowAlerts,
-      avgPct,
-    };
+    return { totalCourses, totalActiveEnrollments, totalLowAlerts, avgPct };
   }, [courses]);
 
   const lowAttendanceRoster = useMemo(
@@ -309,45 +300,27 @@ export function FacultyDashboardClient({
       onSearchChange={setSearchQuery}
       searchPlaceholder="Search assigned courses or students..."
     >
-      {/* Welcome Banner */}
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#003366]">
-            Welcome back, {currentUser.name}!
-          </h1>
-          <p className="mt-1 text-sm text-[#444444]">
-            Manage assigned BCA courses, mark session-by-session attendance, and
-            grade internal assessments.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3 self-start rounded-2xl border border-[#E8EDF5] bg-white px-4 py-3 shadow-xs sm:self-auto">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#EAF2FD] text-[#0055CC]">
-            <Users className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-xs font-bold text-[#003366]">
-              Faculty Workbench
-            </div>
-            <div className="text-[11px] text-[#555555]">
-              {courses.length} Assigned Course(s)
-            </div>
-          </div>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-[#003366]">
+          Welcome back, {currentUser.name}!
+        </h1>
+        <p className="mt-1 text-sm text-[#444444]">
+          Record session attendance and enter 0–30 internal assessment marks.
+        </p>
       </div>
 
-      {/* KPI Row */}
+      {/* Compact KPI Row */}
       <section
         aria-label="Faculty KPI summary"
         className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
-        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF2FD] text-[#0055CC]">
-              <BookOpen className="h-6 w-6" />
+        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF2FD] text-[#0055CC]">
+              <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#003366] tabular-nums">
+              <div className="text-xl font-bold text-[#003366] tabular-nums">
                 {kpis.totalCourses}
               </div>
               <div className="text-xs font-medium text-[#555555]">
@@ -357,55 +330,55 @@ export function FacultyDashboardClient({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF2FD] text-[#0055CC]">
-              <Users className="h-6 w-6" />
+        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF2FD] text-[#0055CC]">
+              <Users className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#003366] tabular-nums">
+              <div className="text-xl font-bold text-[#003366] tabular-nums">
                 {kpis.totalActiveEnrollments}
               </div>
               <div className="text-xs font-medium text-[#555555]">
-                Active Student Seats
+                Active Enrollments
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-4">
+        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
             <div
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+              className={`flex h-11 w-11 items-center justify-center rounded-xl ${
                 kpis.totalLowAlerts > 0
                   ? "bg-[#FEF2F2] text-[#CC0000]"
                   : "bg-[#ECFDF3] text-[#22AA22]"
               }`}
             >
-              <AlertTriangle className="h-6 w-6" />
+              <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
               <div
-                className={`text-2xl font-bold tabular-nums ${
+                className={`text-xl font-bold tabular-nums ${
                   kpis.totalLowAlerts > 0 ? "text-[#CC0000]" : "text-[#003366]"
                 }`}
               >
                 {kpis.totalLowAlerts}
               </div>
               <div className="text-xs font-medium text-[#555555]">
-                &lt; 75% Attendance Alerts
+                &lt; 75% Alerts
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ECFDF3] text-[#22AA22]">
-              <CalendarCheck className="h-6 w-6" />
+        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#ECFDF3] text-[#22AA22]">
+              <CalendarCheck className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#003366] tabular-nums">
+              <div className="text-xl font-bold text-[#003366] tabular-nums">
                 {kpis.avgPct !== null ? `${kpis.avgPct}%` : "N/A"}
               </div>
               <div className="text-xs font-medium text-[#555555]">
@@ -416,430 +389,386 @@ export function FacultyDashboardClient({
         </div>
       </section>
 
-      {/* Low Attendance Alert Strip */}
-      {lowAttendanceRoster.length > 0 && (
-        <div
-          role="alert"
-          className="mt-5 flex items-start gap-3 rounded-2xl border border-[#CC0000]/35 bg-[#FFF5F5] p-4"
-        >
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#CC0000]" />
-          <div className="text-xs">
-            <p className="font-bold text-[#CC0000]">
-              Students Flagged Below 75% Attendance Threshold
-            </p>
-            <p className="mt-0.5 text-[#333333]">
-              {lowAttendanceRoster
-                .map(
-                  (r) =>
-                    `${r.name} (${r.enrollmentNo ?? r.email}) in ${r.courseCode}: ${r.attendanceStats.percentage}% (${r.attendanceStats.presentSessions}/${r.attendanceStats.totalSessions})`
-                )
-                .join(" • ")}
-            </p>
+      {/* Course Selector Pills */}
+      {activeNav !== "alerts" && (
+        <div className="mt-5 rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex flex-wrap gap-2">
+            {filteredCourses.map((course) => {
+              const isSelected = selectedCourse?.id === course.id;
+              return (
+                <button
+                  key={course.id}
+                  type="button"
+                  onClick={() => setSelectedCourseId(course.id)}
+                  className={`inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${
+                    isSelected
+                      ? "border-[#0055CC] bg-[#0055CC] text-white"
+                      : "border-[#E5E9F0] bg-[#F8FAFC] text-[#003366] hover:border-[#0055CC]/50"
+                  }`}
+                >
+                  <span>{course.code}</span>
+                  <span
+                    className={`font-normal ${
+                      isSelected ? "text-blue-100" : "text-[#555555]"
+                    }`}
+                  >
+                    {course.title}
+                  </span>
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                      isSelected
+                        ? "bg-white/20 text-white"
+                        : "bg-[#EAF2FD] text-[#0055CC]"
+                    }`}
+                  >
+                    {course.activeSeats}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Course Selector Pills + Capacity Overview */}
-      <div className="mt-6 grid gap-6 xl:grid-cols-12">
-        <div className="space-y-6 xl:col-span-8">
-          {/* Course Tabs */}
-          <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
-            <div className="mb-3 text-xs font-bold uppercase tracking-wider text-[#555555]">
-              Select Assigned Course
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {filteredCourses.map((course) => {
-                const isSelected = selectedCourse?.id === course.id;
-                return (
+      {/* TAB 1: Attendance Roster */}
+      {selectedCourse && activeNav === "attendance" && (
+        <div className="mt-6 grid gap-6 xl:grid-cols-12">
+          <section className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs xl:col-span-8">
+            <form onSubmit={handleSaveAttendance}>
+              <div className="flex flex-col justify-between gap-4 border-b border-[#F0F0F0] pb-4 sm:flex-row sm:items-end">
+                <div>
+                  <h2 className="text-base font-bold text-[#003366]">
+                    Session Attendance — {selectedCourse.code} (
+                    {selectedCourse.title})
+                  </h2>
+                  <p className="mt-0.5 text-xs text-[#555555]">
+                    Students below 75% are automatically flagged in red.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-end gap-2">
+                  <div>
+                    <label
+                      htmlFor="session-date-input"
+                      className="block text-[11px] font-semibold text-[#333333]"
+                    >
+                      Date
+                    </label>
+                    <input
+                      id="session-date-input"
+                      type="date"
+                      required
+                      value={sessionDate}
+                      onChange={(e) => setSessionDate(e.target.value)}
+                      className="mt-1 h-9 rounded-lg border border-[#D1D5DB] bg-white px-2.5 text-xs font-medium text-[#111111] focus:border-[#0055CC] focus:outline-none"
+                    />
+                  </div>
+
                   <button
-                    key={course.id}
                     type="button"
-                    onClick={() => setSelectedCourseId(course.id)}
-                    className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-semibold transition-all ${
-                      isSelected
-                        ? "border-[#0055CC] bg-[#0055CC] text-white shadow-xs"
-                        : "border-[#E5E9F0] bg-[#F8FAFC] text-[#003366] hover:border-[#0055CC]/50"
-                    }`}
+                    onClick={() => markAllPresent(true)}
+                    className="h-9 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs font-semibold text-[#003366] hover:bg-[#EAF2FD]"
                   >
-                    <span>{course.code}</span>
-                    <span
-                      className={`font-normal ${
-                        isSelected ? "text-blue-100" : "text-[#555555]"
-                      }`}
-                    >
-                      {course.title}
-                    </span>
-                    <span
-                      className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                        isSelected
-                          ? "bg-white/20 text-white"
-                          : "bg-[#EAF2FD] text-[#0055CC]"
-                      }`}
-                    >
-                      {course.activeSeats}
-                    </span>
+                    All Present
                   </button>
-                );
-              })}
+
+                  <button
+                    type="submit"
+                    disabled={savingAttendance || activeStudents.length === 0}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#0055CC] px-4 text-xs font-semibold text-white hover:bg-[#003366] disabled:opacity-50"
+                  >
+                    <Save className="h-3.5 w-3.5" />
+                    <span>{savingAttendance ? "Saving..." : "Save Session"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {selectedCourse.sessionDates.length > 0 && (
+                <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px]">
+                  <span className="font-medium text-[#555555]">Dates:</span>
+                  {selectedCourse.sessionDates.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setSessionDate(d)}
+                      className={`rounded-full px-2.5 py-0.5 font-medium ${
+                        sessionDate === d
+                          ? "bg-[#003366] text-white"
+                          : "bg-[#F1F5F9] text-[#333333] hover:bg-[#E2E8F0]"
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="Session attendance student roster"
+                className="unitrack-table-wrapper unitrack-responsive-table mt-4"
+              >
+                <table className="w-full border-separate border-spacing-0 text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-[#E5E9F0] bg-[#F8FAFC] text-xs font-semibold text-[#555555]">
+                      <th className="rounded-l-lg px-3 py-2.5">Student</th>
+                      <th className="px-3 py-2.5 text-center">
+                        Session ({sessionDate})
+                      </th>
+                      <th className="rounded-r-lg px-3 py-2.5 text-right">
+                        Cumulative %
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F0F0F0]">
+                    {activeStudents.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="px-4 py-8 text-center text-xs text-[#666666]"
+                        >
+                          No students currently enrolled in {selectedCourse.code}.
+                        </td>
+                      </tr>
+                    ) : (
+                      activeStudents.map((st) => {
+                        const isPresent = getCheckedForStudent(st);
+                        const att = st.attendanceStats;
+                        const checkboxId = `att-${st.enrollmentId}`;
+                        return (
+                          <tr key={st.enrollmentId} className="hover:bg-[#F9FBFE]">
+                            <th scope="row" className="px-3 py-3">
+                              <div className="text-xs font-bold text-[#111111]">
+                                {st.name}
+                              </div>
+                              <div className="text-[11px] font-normal text-[#666666]">
+                                {st.enrollmentNo ?? st.email}
+                              </div>
+                            </th>
+                            <td data-label="Present" className="px-3 py-3 text-center">
+                              <label
+                                htmlFor={checkboxId}
+                                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold hover:border-[#0055CC]"
+                              >
+                                <input
+                                  id={checkboxId}
+                                  type="checkbox"
+                                  checked={isPresent}
+                                  onChange={(e) =>
+                                    toggleStudentAttendance(
+                                      st.enrollmentId,
+                                      e.target.checked
+                                    )
+                                  }
+                                  className="h-4 w-4 accent-[#0055CC]"
+                                />
+                                <span
+                                  className={
+                                    isPresent
+                                      ? "text-[#22AA22]"
+                                      : "text-[#CC0000]"
+                                  }
+                                >
+                                  {isPresent ? "Present" : "Absent"}
+                                </span>
+                              </label>
+                            </td>
+                            <td
+                              data-label="Attendance"
+                              className="px-3 py-3 text-right text-xs"
+                            >
+                              {att.totalSessions === 0 ? (
+                                <span className="text-[#666666]">0 sessions</span>
+                              ) : att.isLowAttendance ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#CC0000]/12 px-2.5 py-0.5 font-bold text-[#CC0000]">
+                                  <AlertCircle className="h-3 w-3" />
+                                  {att.percentage}% ({att.presentSessions}/
+                                  {att.totalSessions}) &lt;75%
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#22AA22]/12 px-2.5 py-0.5 font-semibold text-[#177A17]">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  {att.percentage}% ({att.presentSessions}/
+                                  {att.totalSessions})
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </form>
+          </section>
+
+          <div className="space-y-6 xl:col-span-4">
+            <section className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
+              <h2 className="text-base font-bold text-[#003366]">
+                Low Attendance Alerts (&lt; 75%)
+              </h2>
+              {lowAttendanceRoster.length === 0 ? (
+                <p className="mt-3 text-xs text-[#22AA22]">
+                  All students meet the 75% attendance requirement.
+                </p>
+              ) : (
+                <ul className="mt-3 space-y-2.5">
+                  {lowAttendanceRoster.map((item) => (
+                    <li
+                      key={item.enrollmentId}
+                      className="rounded-xl border border-[#CC0000]/25 bg-[#FFF5F5] p-3 text-xs"
+                    >
+                      <div className="flex items-center justify-between font-bold text-[#CC0000]">
+                        <span>{item.name}</span>
+                        <span>{item.attendanceStats.percentage}%</span>
+                      </div>
+                      <div className="mt-0.5 text-[#333333]">
+                        {item.courseCode} •{" "}
+                        {item.attendanceStats.presentSessions}/
+                        {item.attendanceStats.totalSessions} sessions
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: Internal Marks (0-30) */}
+      {selectedCourse && activeNav === "marks" && (
+        <section className="mt-6 rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
+          <div className="mb-4 flex items-center gap-2">
+            <Award className="h-5 w-5 text-[#0055CC]" />
+            <div>
+              <h2 className="text-base font-bold text-[#003366]">
+                Internal Marks (0–30) — {selectedCourse.code}
+              </h2>
+              <p className="text-xs text-[#555555]">
+                Update internal scores or mark course completion to unlock
+                prerequisites.
+              </p>
             </div>
           </div>
 
-          {/* Session Attendance Form */}
-          {selectedCourse &&
-            (activeNav === "dashboard" || activeNav === "attendance") && (
-              <section className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-                <form onSubmit={handleSaveAttendance}>
-                  <div className="flex flex-col justify-between gap-4 border-b border-[#F0F0F0] pb-4 sm:flex-row sm:items-end">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <CalendarCheck className="h-5 w-5 text-[#0055CC]" />
-                        <h2 className="text-base font-bold text-[#003366]">
-                          Session Attendance — {selectedCourse.code} (
-                          {selectedCourse.title})
-                        </h2>
-                      </div>
-                      <p className="mt-1 text-xs text-[#555555]">
-                        Check Present students for the selected date and click
-                        Save Session. Unchecked students are recorded Absent.
-                      </p>
-                    </div>
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Internal marks gradebook"
+            className="unitrack-table-wrapper unitrack-responsive-table"
+          >
+            <table className="w-full border-separate border-spacing-0 text-left text-sm">
+              <thead>
+                <tr className="border-b border-[#E5E9F0] bg-[#F8FAFC] text-xs font-semibold text-[#555555]">
+                  <th className="rounded-l-lg px-3 py-2.5">Student</th>
+                  <th className="px-3 py-2.5 text-center">Status</th>
+                  <th className="px-3 py-2.5 text-center">Marks (0–30)</th>
+                  <th className="rounded-r-lg px-3 py-2.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F0F0F0]">
+                {selectedCourse.students.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-4 py-8 text-center text-xs text-[#666666]"
+                    >
+                      No student enrollments recorded for {selectedCourse.code}.
+                    </td>
+                  </tr>
+                ) : (
+                  selectedCourse.students.map((st) => {
+                    const inputVal =
+                      marksDraft[st.enrollmentId] ??
+                      (st.internalMarks !== null
+                        ? String(st.internalMarks)
+                        : "");
+                    const isSaving = savingMarksId === st.enrollmentId;
+                    const marksId = `marks-${st.enrollmentId}`;
 
-                    <div className="flex flex-wrap items-end gap-2.5">
-                      <div>
-                        <label
-                          htmlFor="session-date-input"
-                          className="block text-[11px] font-semibold text-[#333333]"
-                        >
-                          Session Date
-                        </label>
-                        <input
-                          id="session-date-input"
-                          type="date"
-                          required
-                          value={sessionDate}
-                          onChange={(e) => setSessionDate(e.target.value)}
-                          className="mt-1 h-9 rounded-lg border border-[#D1D5DB] bg-white px-2.5 text-xs font-medium text-[#111111] focus:border-[#0055CC] focus:outline-none"
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => markAllPresent(true)}
-                        className="h-9 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs font-semibold text-[#003366] hover:bg-[#EAF2FD]"
-                      >
-                        Mark All Present
-                      </button>
-
-                      <button
-                        type="submit"
-                        disabled={
-                          savingAttendance || activeStudents.length === 0
-                        }
-                        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#0055CC] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#003366] disabled:opacity-50"
-                      >
-                        <Save className="h-3.5 w-3.5" />
-                        <span>
-                          {savingAttendance ? "Saving..." : "Save Session"}
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Quick Recorded Dates Chips */}
-                  {selectedCourse.sessionDates.length > 0 && (
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px]">
-                      <span className="font-medium text-[#555555]">
-                        Recorded dates:
-                      </span>
-                      {selectedCourse.sessionDates.map((d) => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => setSessionDate(d)}
-                          className={`rounded-full px-2.5 py-0.5 font-medium transition-colors ${
-                            sessionDate === d
-                              ? "bg-[#003366] text-white"
-                              : "bg-[#F1F5F9] text-[#333333] hover:bg-[#E2E8F0]"
-                          }`}
-                        >
-                          {d}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  <div
-                    tabIndex={0}
-                    role="region"
-                    aria-label="Session attendance student roster"
-                    className="unitrack-table-wrapper unitrack-responsive-table mt-4"
-                  >
-                    <table className="w-full border-separate border-spacing-0 text-left text-sm">
-                      <thead>
-                        <tr className="border-b border-[#E5E9F0] bg-[#F8FAFC] text-xs font-semibold text-[#555555]">
-                          <th className="rounded-l-lg px-3 py-2.5">Student</th>
-                          <th className="px-3 py-2.5">Enrollment No</th>
-                          <th className="px-3 py-2.5 text-center">
-                            Present ({sessionDate})
-                          </th>
-                          <th className="rounded-r-lg px-3 py-2.5 text-right">
-                            Cumulative Attendance
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#F0F0F0]">
-                        {activeStudents.length === 0 ? (
-                          <tr>
-                            <td
-                              colSpan={4}
-                              className="px-4 py-8 text-center text-xs text-[#666666]"
-                            >
-                              No students are currently ENROLLED in{" "}
-                              {selectedCourse.code}.
-                            </td>
-                          </tr>
-                        ) : (
-                          activeStudents.map((st) => {
-                            const isPresent = getCheckedForStudent(st);
-                            const att = st.attendanceStats;
-                            const checkboxId = `att-${st.enrollmentId}`;
-                            return (
-                              <tr
-                                key={st.enrollmentId}
-                                className="hover:bg-[#F9FBFE]"
-                              >
-                                <th
-                                  scope="row"
-                                  className="px-3 py-3 text-xs font-bold text-[#111111]"
-                                >
-                                  {st.name}
-                                  <div className="text-[11px] font-normal text-[#666666]">
-                                    {st.email}
-                                  </div>
-                                </th>
-                                <td
-                                  data-label="Enrollment No"
-                                  className="px-3 py-3 text-xs font-medium text-[#003366]"
-                                >
-                                  {st.enrollmentNo ?? "—"}
-                                </td>
-                                <td
-                                  data-label="Present"
-                                  className="px-3 py-3 text-center"
-                                >
-                                  <label
-                                    htmlFor={checkboxId}
-                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold hover:border-[#0055CC]"
-                                  >
-                                    <input
-                                      id={checkboxId}
-                                      type="checkbox"
-                                      checked={isPresent}
-                                      onChange={(e) =>
-                                        toggleStudentAttendance(
-                                          st.enrollmentId,
-                                          e.target.checked
-                                        )
-                                      }
-                                      className="h-4 w-4 accent-[#0055CC]"
-                                    />
-                                    <span
-                                      className={
-                                        isPresent
-                                          ? "text-[#22AA22]"
-                                          : "text-[#CC0000]"
-                                      }
-                                    >
-                                      {isPresent ? "Present" : "Absent"}
-                                    </span>
-                                  </label>
-                                </td>
-                                <td
-                                  data-label="Attendance %"
-                                  className="px-3 py-3 text-right text-xs"
-                                >
-                                  {att.totalSessions === 0 ? (
-                                    <span className="text-[#666666]">
-                                      0 sessions
-                                    </span>
-                                  ) : att.isLowAttendance ? (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#CC0000]/12 px-2.5 py-0.5 font-bold text-[#CC0000]">
-                                      <AlertCircle className="h-3 w-3" />
-                                      {att.percentage}% ({att.presentSessions}/
-                                      {att.totalSessions}) &lt;75%
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#22AA22]/12 px-2.5 py-0.5 font-semibold text-[#177A17]">
-                                      <CheckCircle2 className="h-3 w-3" />
-                                      {att.percentage}% ({att.presentSessions}/
-                                      {att.totalSessions})
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </form>
-              </section>
-            )}
-
-          {/* Internal Marks (0-30) & Completion Gradebook */}
-          {selectedCourse &&
-            (activeNav === "dashboard" || activeNav === "marks") && (
-              <section className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-                <div className="mb-4 flex items-center gap-2">
-                  <Award className="h-5 w-5 text-[#0055CC]" />
-                  <div>
-                    <h2 className="text-base font-bold text-[#003366]">
-                      Internal Marks (0–30) & Course Completion —{" "}
-                      {selectedCourse.code}
-                    </h2>
-                    <p className="text-xs text-[#555555]">
-                      Enter continuous evaluation scores out of 30 or mark a
-                      student as Completed to unlock dependent courses.
-                    </p>
-                  </div>
-                </div>
-
-                <div
-                  tabIndex={0}
-                  role="region"
-                  aria-label="Internal marks gradebook"
-                  className="unitrack-table-wrapper unitrack-responsive-table"
-                >
-                  <table className="w-full border-separate border-spacing-0 text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-[#E5E9F0] bg-[#F8FAFC] text-xs font-semibold text-[#555555]">
-                        <th className="rounded-l-lg px-3 py-2.5">Student</th>
-                        <th className="px-3 py-2.5 text-center">Status</th>
-                        <th className="px-3 py-2.5 text-center">
-                          Internal Marks (0–30)
+                    return (
+                      <tr key={st.enrollmentId} className="hover:bg-[#F9FBFE]">
+                        <th scope="row" className="px-3 py-3">
+                          <div className="text-xs font-bold text-[#111111]">
+                            {st.name}
+                          </div>
+                          <div className="text-[11px] font-normal text-[#666666]">
+                            {st.enrollmentNo ?? st.email}
+                          </div>
                         </th>
-                        <th className="rounded-r-lg px-3 py-2.5 text-right">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#F0F0F0]">
-                      {selectedCourse.students.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan={4}
-                            className="px-4 py-8 text-center text-xs text-[#666666]"
+                        <td data-label="Status" className="px-3 py-3 text-center">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                              st.status === "COMPLETED"
+                                ? "bg-[#22AA22]/15 text-[#177A17]"
+                                : "bg-[#0055CC]/12 text-[#0055CC]"
+                            }`}
                           >
-                            No student enrollments recorded for{" "}
-                            {selectedCourse.code}.
-                          </td>
-                        </tr>
-                      ) : (
-                        selectedCourse.students.map((st) => {
-                          const inputVal =
-                            marksDraft[st.enrollmentId] ??
-                            (st.internalMarks !== null
-                              ? String(st.internalMarks)
-                              : "");
-                          const isSaving = savingMarksId === st.enrollmentId;
-                          const marksId = `marks-${st.enrollmentId}`;
-
-                          return (
-                            <tr
-                              key={st.enrollmentId}
-                              className="hover:bg-[#F9FBFE]"
+                            {st.status}
+                          </span>
+                        </td>
+                        <td data-label="Marks" className="px-3 py-3 text-center">
+                          <label htmlFor={marksId} className="sr-only">
+                            Internal marks for {st.name}
+                          </label>
+                          <input
+                            id={marksId}
+                            type="text"
+                            inputMode="numeric"
+                            value={inputVal}
+                            onChange={(e) =>
+                              setMarksDraft((prev) => ({
+                                ...prev,
+                                [st.enrollmentId]: e.target.value,
+                              }))
+                            }
+                            placeholder="0-30"
+                            className="h-9 w-24 rounded-lg border border-[#D1D5DB] px-2.5 text-center text-xs font-semibold text-[#003366] focus:border-[#0055CC] focus:outline-none"
+                          />
+                        </td>
+                        <td data-label="Actions" className="px-3 py-3 text-right">
+                          <div className="inline-flex items-center gap-2">
+                            <button
+                              type="button"
+                              disabled={isSaving}
+                              onClick={() => handleSaveMarks(st)}
+                              className="rounded-lg bg-[#0055CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#003366] disabled:opacity-50"
                             >
-                              <th
-                                scope="row"
-                                className="px-3 py-3 text-xs font-bold text-[#111111]"
-                              >
-                                {st.name}
-                                <div className="text-[11px] font-normal text-[#666666]">
-                                  {st.enrollmentNo ?? st.email}
-                                </div>
-                              </th>
-                              <td
-                                data-label="Status"
-                                className="px-3 py-3 text-center"
-                              >
-                                <span
-                                  className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                                    st.status === "COMPLETED"
-                                      ? "bg-[#22AA22]/15 text-[#177A17]"
-                                      : "bg-[#0055CC]/12 text-[#0055CC]"
-                                  }`}
-                                >
-                                  {st.status}
-                                </span>
-                              </td>
-                              <td
-                                data-label="Marks"
-                                className="px-3 py-3 text-center"
-                              >
-                                <label htmlFor={marksId} className="sr-only">
-                                  Internal marks for {st.name}
-                                </label>
-                                <input
-                                  id={marksId}
-                                  type="text"
-                                  inputMode="numeric"
-                                  value={inputVal}
-                                  onChange={(e) =>
-                                    setMarksDraft((prev) => ({
-                                      ...prev,
-                                      [st.enrollmentId]: e.target.value,
-                                    }))
-                                  }
-                                  placeholder="0-30"
-                                  className="h-9 w-24 rounded-lg border border-[#D1D5DB] px-2.5 text-center text-xs font-semibold text-[#003366] focus:border-[#0055CC] focus:outline-none"
-                                />
-                              </td>
-                              <td
-                                data-label="Actions"
-                                className="px-3 py-3 text-right"
-                              >
-                                <div className="inline-flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    disabled={isSaving}
-                                    onClick={() => handleSaveMarks(st)}
-                                    className="rounded-lg bg-[#0055CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#003366] disabled:opacity-50"
-                                  >
-                                    {isSaving ? "Saving..." : "Save Marks"}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    disabled={isSaving}
-                                    onClick={() =>
-                                      handleSaveMarks(
-                                        st,
-                                        st.status === "COMPLETED"
-                                          ? "ENROLLED"
-                                          : "COMPLETED"
-                                      )
-                                    }
-                                    className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#333333] hover:bg-[#F4F7FB] disabled:opacity-50"
-                                  >
-                                    {st.status === "COMPLETED"
-                                      ? "Reopen"
-                                      : "Complete"}
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            )}
-        </div>
+                              {isSaving ? "..." : "Save"}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isSaving}
+                              onClick={() =>
+                                handleSaveMarks(
+                                  st,
+                                  st.status === "COMPLETED"
+                                    ? "ENROLLED"
+                                    : "COMPLETED"
+                                )
+                              }
+                              className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#333333] hover:bg-[#F4F7FB] disabled:opacity-50"
+                            >
+                              {st.status === "COMPLETED" ? "Reopen" : "Complete"}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
-        {/* Right Summary Column */}
-        <div className="space-y-6 xl:col-span-4">
+      {/* TAB 3: Capacity & Alerts Overview */}
+      {activeNav === "alerts" && (
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <CapacityBarChart
             items={courses.map((c) => ({
               code: c.code,
@@ -857,23 +786,23 @@ export function FacultyDashboardClient({
             </h2>
             {lowAttendanceRoster.length === 0 ? (
               <p className="mt-3 text-xs text-[#22AA22]">
-                All enrolled students across your assigned courses are meeting
-                the 75% threshold.
+                All enrolled students meet the 75% threshold.
               </p>
             ) : (
-              <ul className="mt-3 space-y-2.5">
+              <ul className="mt-4 space-y-2.5">
                 {lowAttendanceRoster.map((item) => (
                   <li
                     key={item.enrollmentId}
-                    className="rounded-xl border border-[#CC0000]/25 bg-[#FFF5F5] p-3 text-xs"
+                    className="rounded-xl border border-[#CC0000]/25 bg-[#FFF5F5] p-3.5 text-xs"
                   >
                     <div className="flex items-center justify-between font-bold text-[#CC0000]">
                       <span>{item.name}</span>
                       <span>{item.attendanceStats.percentage}%</span>
                     </div>
-                    <div className="mt-0.5 text-[#333333]">
-                      {item.courseCode} • {item.attendanceStats.presentSessions}
-                      /{item.attendanceStats.totalSessions} sessions
+                    <div className="mt-1 text-[#333333]">
+                      {item.courseCode} ({item.courseTitle}) •{" "}
+                      {item.attendanceStats.presentSessions}/
+                      {item.attendanceStats.totalSessions} sessions
                     </div>
                   </li>
                 ))}
@@ -881,7 +810,7 @@ export function FacultyDashboardClient({
             )}
           </section>
         </div>
-      </div>
+      )}
     </AppShell>
   );
 }

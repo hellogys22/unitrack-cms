@@ -8,7 +8,7 @@ import { FacultyDashboardClient } from "@/components/FacultyDashboardClient";
 async function FacultyPortalContent() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/");
+    redirect("/login");
   }
   if (user.role !== "FACULTY" && user.role !== "ADMIN") {
     redirect(getRoleHomePath(user.role));

@@ -8,7 +8,7 @@ import { StudentDashboardClient } from "@/components/StudentDashboardClient";
 async function StudentPortalContent() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/");
+    redirect("/login");
   }
   if (user.role !== "STUDENT") {
     redirect(getRoleHomePath(user.role));
@@ -29,7 +29,7 @@ async function StudentPortalContent() {
   ]);
 
   if (!dashboardData) {
-    redirect("/");
+    redirect("/login");
   }
 
   return (

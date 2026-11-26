@@ -12,25 +12,39 @@ export async function POST(request: NextRequest) {
     const body = (await request.json().catch(() => null)) as {
       userId?: string;
       email?: string;
+      identifier?: string;
     } | null;
 
     const userId = body?.userId?.trim();
     const email = body?.email?.trim().toLowerCase();
+    const identifier = body?.identifier?.trim();
 
-    if (!userId && !email) {
+    if (!userId && !email && !identifier) {
       return NextResponse.json(
-        { error: "userId or email is required" },
+        { error: "Please enter an email address or enrollment number." },
         { status: 400 }
       );
     }
 
-    const user = await prisma.user.findFirst({
-      where: userId ? { id: userId } : { email },
-    });
+    const user = userId
+      ? await prisma.user.findUnique({ where: { id: userId } })
+      : email
+        ? await prisma.user.findUnique({ where: { email } })
+        : await prisma.user.findFirst({
+            where: {
+              OR: [
+                { email: { equals: identifier, mode: "insensitive" } },
+                { enrollmentNo: { equals: identifier, mode: "insensitive" } },
+              ],
+            },
+          });
 
     if (!user) {
       return NextResponse.json(
-        { error: "Demo user account not found. Ensure database is seeded." },
+        {
+          error:
+            "Account not found. Try a seeded email (e.g. rahul.das@unitrack.edu) or enrollment no (e.g. BCA2026012).",
+        },
         { status: 404 }
       );
     }

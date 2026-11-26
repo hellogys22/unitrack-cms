@@ -8,7 +8,7 @@ import { AdminDashboardClient } from "@/components/AdminDashboardClient";
 async function AdminPortalContent() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/");
+    redirect("/login");
   }
   if (user.role !== "ADMIN") {
     redirect(getRoleHomePath(user.role));

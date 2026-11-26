@@ -65,10 +65,9 @@ export interface AdminOverviewPayload {
 }
 
 const ADMIN_NAV: NavItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: "dashboard" },
   { id: "courses", label: "Course Catalog", icon: "courses" },
-  { id: "students", label: "Student CBCS Audit", icon: "users" },
-  { id: "analytics", label: "Capacity Analytics", icon: "analytics" },
+  { id: "students", label: "Student Audit", icon: "users" },
+  { id: "analytics", label: "Capacity", icon: "analytics" },
 ];
 
 interface CourseFormState {
@@ -95,7 +94,7 @@ export function AdminDashboardClient({
   const router = useRouter();
   const { showToast } = useToast();
   const [data, setData] = useState<AdminOverviewPayload>(initialData);
-  const [activeNav, setActiveNav] = useState<string>("dashboard");
+  const [activeNav, setActiveNav] = useState<string>("courses");
   const [searchQuery, setSearchQuery] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -283,80 +282,79 @@ export function AdminDashboardClient({
       onSearchChange={setSearchQuery}
       searchPlaceholder="Search courses by code, title, or faculty..."
     >
-      {/* Welcome Banner */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-[#003366]">
             Welcome back, {currentUser.name}!
           </h1>
           <p className="mt-1 text-sm text-[#444444]">
-            Configure CBCS curriculum, assign faculty, manage prerequisite chains,
-            and monitor live seat utilization.
+            Manage courses, faculty assignments, seat capacities, and
+            prerequisites.
           </p>
         </div>
 
         <button
           type="button"
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 self-start rounded-xl bg-[#0055CC] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-[#003366] sm:self-auto"
+          className="inline-flex items-center gap-2 self-start rounded-xl bg-[#0055CC] px-4 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-[#003366] sm:self-auto"
         >
           <Plus className="h-4 w-4" />
           <span>Add New Course</span>
         </button>
       </div>
 
-      {/* KPI Metric Cards */}
+      {/* Compact KPI Row */}
       <section
         aria-label="Admin key metrics"
         className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
-        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF2FD] text-[#0055CC]">
-              <BookOpen className="h-6 w-6" />
+        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF2FD] text-[#0055CC]">
+              <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#003366] tabular-nums">
+              <div className="text-xl font-bold text-[#003366] tabular-nums">
                 {data.metrics.totalCourses}
               </div>
               <div className="text-xs font-medium text-[#555555]">
-                Active CBCS Courses
+                CBCS Courses
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF2FD] text-[#0055CC]">
-              <ShieldCheck className="h-6 w-6" />
+        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF2FD] text-[#0055CC]">
+              <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#003366] tabular-nums">
+              <div className="text-xl font-bold text-[#003366] tabular-nums">
                 {data.metrics.totalActiveEnrollments} /{" "}
                 {data.metrics.totalMaxSeats}
               </div>
               <div className="text-xs font-medium text-[#555555]">
-                Enrolled / Batch Seats
+                Enrolled / Seats
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-4">
+        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
             <div
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+              className={`flex h-11 w-11 items-center justify-center rounded-xl ${
                 data.metrics.totalLowAttendanceAlerts > 0
                   ? "bg-[#FEF2F2] text-[#CC0000]"
                   : "bg-[#ECFDF3] text-[#22AA22]"
               }`}
             >
-              <AlertTriangle className="h-6 w-6" />
+              <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
               <div
-                className={`text-2xl font-bold tabular-nums ${
+                className={`text-xl font-bold tabular-nums ${
                   data.metrics.totalLowAttendanceAlerts > 0
                     ? "text-[#CC0000]"
                     : "text-[#003366]"
@@ -365,52 +363,47 @@ export function AdminDashboardClient({
                 {data.metrics.totalLowAttendanceAlerts}
               </div>
               <div className="text-xs font-medium text-[#555555]">
-                &lt; 75% Attendance Alerts
+                &lt; 75% Alerts
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ECFDF3] text-[#22AA22]">
-              <Users className="h-6 w-6" />
+        <div className="rounded-2xl border border-[#F0F0F0] bg-white p-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#ECFDF3] text-[#22AA22]">
+              <Users className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#003366] tabular-nums">
+              <div className="text-xl font-bold text-[#003366] tabular-nums">
                 {data.metrics.totalStudents}
               </div>
               <div className="text-xs font-medium text-[#555555]">
-                Registered Students
+                Students
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Main Split: Course Management Table + Capacity Chart */}
-      {(activeNav === "dashboard" ||
-        activeNav === "courses" ||
-        activeNav === "analytics") && (
+      {/* TAB 1: Course Management + Capacity Chart */}
+      {activeNav === "courses" && (
         <div className="mt-6 grid gap-6 xl:grid-cols-12">
           <section className="rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs xl:col-span-8">
-            <div className="flex flex-col justify-between gap-3 border-b border-[#F0F0F0] pb-4 sm:flex-row sm:items-center">
-              <div>
-                <h2 className="text-base font-bold text-[#003366]">
-                  CBCS Course Catalog & Safe Deletion Control
-                </h2>
-                <p className="text-xs text-[#555555]">
-                  Courses with active ENROLLED students are protected from
-                  deletion (HTTP 400).
-                </p>
-              </div>
+            <div className="border-b border-[#F0F0F0] pb-3.5">
+              <h2 className="text-base font-bold text-[#003366]">
+                Course Catalog &amp; Safe Deletion
+              </h2>
+              <p className="text-xs text-[#555555]">
+                Courses with active enrolled students are protected (HTTP 400).
+              </p>
             </div>
 
             {deleteAlert && (
               <div
                 role="status"
                 aria-live="polite"
-                className={`mt-4 flex items-start gap-2.5 rounded-xl border p-3.5 text-xs ${
+                className={`mt-4 flex items-start gap-2.5 rounded-xl border p-3 text-xs ${
                   deleteAlert.type === "error"
                     ? "border-[#CC0000]/35 bg-[#FFF5F5] text-[#990000]"
                     : "border-[#22AA22]/35 bg-[#F0FDF4] text-[#14532D]"
@@ -436,12 +429,11 @@ export function AdminDashboardClient({
               <table className="w-full border-separate border-spacing-0 text-left text-sm">
                 <thead>
                   <tr className="border-b border-[#E5E9F0] bg-[#F8FAFC] text-xs font-semibold text-[#555555]">
-                    <th className="rounded-l-lg px-3 py-2.5">Code</th>
-                    <th className="px-3 py-2.5">Title & Faculty</th>
-                    <th className="px-3 py-2.5 text-center">Credits</th>
-                    <th className="px-3 py-2.5">Prerequisite</th>
-                    <th className="px-3 py-2.5 text-center">Enrolled / Max</th>
-                    <th className="rounded-r-lg px-3 py-2.5 text-right">
+                    <th className="rounded-l-lg px-2.5 py-2.5">Course</th>
+                    <th className="px-2.5 py-2.5 text-center">Cr</th>
+                    <th className="px-2.5 py-2.5">Prereq</th>
+                    <th className="px-2.5 py-2.5 text-center">Seats</th>
+                    <th className="rounded-r-lg px-2.5 py-2.5 text-right">
                       Actions
                     </th>
                   </tr>
@@ -451,42 +443,39 @@ export function AdminDashboardClient({
                     const isFull = course.activeSeats >= course.maxSeats;
                     return (
                       <tr key={course.id} className="hover:bg-[#F9FBFE]">
-                        <th
-                          scope="row"
-                          className="whitespace-nowrap px-3 py-3 text-xs font-bold text-[#003366]"
-                        >
-                          {course.code}
-                          <div className="text-[10px] font-medium text-[#666666]">
-                            Sem {course.semester}
+                        <th scope="row" className="px-2.5 py-3 align-top">
+                          <div className="text-xs font-bold text-[#003366]">
+                            {course.code}{" "}
+                            <span className="font-normal text-[#666666]">
+                              • Sem {course.semester}
+                            </span>
                           </div>
-                        </th>
-                        <td data-label="Course" className="px-3 py-3">
-                          <div className="font-semibold text-[#111111]">
+                          <div className="text-xs font-semibold text-[#111111]">
                             {course.title}
                           </div>
-                          <div className="text-[11px] text-[#555555]">
+                          <div className="text-[11px] font-normal text-[#666666]">
                             {course.faculty.name}
                           </div>
-                        </td>
+                        </th>
                         <td
                           data-label="Credits"
-                          className="px-3 py-3 text-center text-xs font-semibold text-[#333333] tabular-nums"
+                          className="px-2.5 py-3 text-center text-xs font-semibold text-[#333333] tabular-nums"
                         >
                           {course.credits}
                         </td>
-                        <td data-label="Prerequisite" className="px-3 py-3">
+                        <td data-label="Prerequisite" className="px-2.5 py-3">
                           {course.prerequisite ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF2FD] px-2.5 py-0.5 text-[11px] font-semibold text-[#0055CC]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF2FD] px-2 py-0.5 text-[11px] font-semibold text-[#0055CC]">
                               <Lock className="h-3 w-3" />
                               {course.prerequisite.code}
                             </span>
                           ) : (
-                            <span className="text-xs text-[#666666]">None</span>
+                            <span className="text-xs text-[#777777]">—</span>
                           )}
                         </td>
                         <td
                           data-label="Enrolled"
-                          className="px-3 py-3 text-center text-xs font-bold tabular-nums"
+                          className="px-2.5 py-3 text-center text-xs font-bold tabular-nums"
                         >
                           <span
                             className={
@@ -497,14 +486,11 @@ export function AdminDashboardClient({
                                   : "text-[#666666]"
                             }
                           >
-                            {course.activeSeats} / {course.maxSeats}
+                            {course.activeSeats}/{course.maxSeats}
                           </span>
                         </td>
-                        <td
-                          data-label="Actions"
-                          className="px-3 py-3 text-right"
-                        >
-                          <div className="inline-flex items-center gap-2">
+                        <td data-label="Actions" className="px-2.5 py-3 text-right">
+                          <div className="inline-flex items-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => openEditModal(course)}
@@ -533,7 +519,7 @@ export function AdminDashboardClient({
             </div>
           </section>
 
-          <div className="space-y-6 xl:col-span-4">
+          <div className="xl:col-span-4">
             <CapacityBarChart
               items={data.courses.map((c) => ({
                 code: c.code,
@@ -546,18 +532,15 @@ export function AdminDashboardClient({
         </div>
       )}
 
-      {/* Student CBCS Credit & Attendance Audit */}
-      {(activeNav === "dashboard" || activeNav === "students") && (
+      {/* TAB 2: Student CBCS Audit */}
+      {activeNav === "students" && (
         <section className="mt-6 rounded-2xl border border-[#F0F0F0] bg-white p-5 shadow-xs">
           <div className="mb-4 flex items-center gap-2">
             <Users className="h-5 w-5 text-[#0055CC]" />
             <div>
               <h2 className="text-base font-bold text-[#003366]">
-                Student CBCS Credit Cap & Attendance Compliance
+                Student CBCS Credit Cap &amp; Attendance Compliance
               </h2>
-              <p className="text-xs text-[#555555]">
-                Live audit across registered BCA students
-              </p>
             </div>
           </div>
 
@@ -572,12 +555,10 @@ export function AdminDashboardClient({
                 <tr className="border-b border-[#E5E9F0] bg-[#F8FAFC] text-xs font-semibold text-[#555555]">
                   <th className="rounded-l-lg px-3 py-2.5">Student</th>
                   <th className="px-3 py-2.5">Enrollment No</th>
-                  <th className="px-3 py-2.5 text-center">
-                    Active Credits / 24
-                  </th>
-                  <th className="px-3 py-2.5 text-center">Completed Credits</th>
+                  <th className="px-3 py-2.5 text-center">Active Credits</th>
+                  <th className="px-3 py-2.5 text-center">Completed</th>
                   <th className="rounded-r-lg px-3 py-2.5 text-right">
-                    Overall Attendance
+                    Attendance
                   </th>
                 </tr>
               </thead>
@@ -586,11 +567,10 @@ export function AdminDashboardClient({
                   const att = st.attendanceStats;
                   return (
                     <tr key={st.id} className="hover:bg-[#F9FBFE]">
-                      <th
-                        scope="row"
-                        className="px-3 py-3 text-xs font-bold text-[#111111]"
-                      >
-                        {st.name}
+                      <th scope="row" className="px-3 py-3">
+                        <div className="text-xs font-bold text-[#111111]">
+                          {st.name}
+                        </div>
                         <div className="text-[11px] font-normal text-[#666666]">
                           {st.email}
                         </div>
@@ -605,30 +585,23 @@ export function AdminDashboardClient({
                         data-label="Active Credits"
                         className="px-3 py-3 text-center text-xs font-bold text-[#003366] tabular-nums"
                       >
-                        {st.activeCredits} / 24 ({st.activeCoursesCount}{" "}
-                        courses)
+                        {st.activeCredits} / 24
                       </td>
                       <td
-                        data-label="Completed Credits"
+                        data-label="Completed"
                         className="px-3 py-3 text-center text-xs font-semibold text-[#22AA22] tabular-nums"
                       >
-                        {st.completedCredits} ({st.completedCoursesCount}{" "}
-                        courses)
+                        {st.completedCredits} Cr
                       </td>
-                      <td
-                        data-label="Attendance"
-                        className="px-3 py-3 text-right text-xs"
-                      >
+                      <td data-label="Attendance" className="px-3 py-3 text-right text-xs">
                         {att.totalSessions === 0 ? (
-                          <span className="text-[#666666]">No sessions</span>
+                          <span className="text-[#666666]">—</span>
                         ) : att.isLowAttendance ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#CC0000]/12 px-2.5 py-0.5 font-bold text-[#CC0000]">
-                            <AlertTriangle className="h-3 w-3" />
+                          <span className="inline-flex rounded-full bg-[#CC0000]/12 px-2.5 py-0.5 font-bold text-[#CC0000]">
                             {att.percentage}% (&lt;75% Alert)
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#22AA22]/12 px-2.5 py-0.5 font-semibold text-[#177A17]">
-                            <CheckCircle2 className="h-3 w-3" />
+                          <span className="inline-flex rounded-full bg-[#22AA22]/12 px-2.5 py-0.5 font-semibold text-[#177A17]">
                             {att.percentage}% On Track
                           </span>
                         )}
@@ -642,17 +615,28 @@ export function AdminDashboardClient({
         </section>
       )}
 
-      {/* Native <dialog> Create / Edit Course Modal */}
+      {/* TAB 3: Capacity View */}
+      {activeNav === "analytics" && (
+        <div className="mt-6">
+          <CapacityBarChart
+            items={data.courses.map((c) => ({
+              code: c.code,
+              title: c.title,
+              activeSeats: c.activeSeats,
+              maxSeats: c.maxSeats,
+            }))}
+          />
+        </div>
+      )}
+
+      {/* Create / Edit Course Modal */}
       <dialog
         ref={courseDialogRef}
         aria-labelledby="course-modal-title"
         className="m-auto w-full max-w-lg rounded-2xl border border-[#E5E9F0] bg-white p-0 shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-[#F0F0F0] px-6 py-4">
-          <h1
-            id="course-modal-title"
-            className="text-base font-bold text-[#003366]"
-          >
+          <h1 id="course-modal-title" className="text-base font-bold text-[#003366]">
             {form.id ? `Edit Course — ${form.code}` : "Create New CBCS Course"}
           </h1>
           <button
@@ -755,9 +739,7 @@ export function AdminDashboardClient({
               required
               rows={2}
               value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
               className="mt-1 w-full rounded-lg border border-[#D1D5DB] px-3 py-2 text-sm text-[#111111] focus:border-[#0055CC] focus:outline-none"
             />
           </div>
@@ -871,16 +853,13 @@ export function AdminDashboardClient({
         </form>
       </dialog>
 
-      {/* Native <dialog> Safe Delete Confirmation Modal */}
+      {/* Safe Delete Confirmation Modal */}
       <dialog
         ref={deleteDialogRef}
         aria-labelledby="delete-modal-title"
         className="m-auto w-full max-w-md rounded-2xl border border-[#E5E9F0] bg-white p-6 shadow-2xl"
       >
-        <h1
-          id="delete-modal-title"
-          className="text-base font-bold text-[#003366]"
-        >
+        <h1 id="delete-modal-title" className="text-base font-bold text-[#003366]">
           Confirm Course Deletion
         </h1>
         <p className="mt-2 text-xs leading-relaxed text-[#444444]">
@@ -888,8 +867,8 @@ export function AdminDashboardClient({
           <strong className="text-[#111111]">
             {courseToDelete?.code} — {courseToDelete?.title}
           </strong>
-          ? Note: Safe Deletion will block this operation with HTTP 400 if any
-          students are currently <code>ENROLLED</code> (currently{" "}
+          ? Safe Deletion blocks deletion with HTTP 400 if students are
+          currently <code>ENROLLED</code> (currently{" "}
           {courseToDelete?.activeSeats ?? 0} active).
         </p>
         <div className="mt-5 flex items-center justify-end gap-3">

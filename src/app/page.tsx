@@ -7,40 +7,34 @@ import { LandingPortal } from "@/components/LandingPortal";
 async function LandingContent() {
   await connection();
   const currentUser = await getCurrentUser();
-  const [demoUsers, courseCount, enrollmentCount] = await Promise.all([
-    prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        enrollmentNo: true,
-        role: true,
-      },
-      orderBy: [{ role: "asc" }, { name: "asc" }],
-    }),
-    prisma.course.count(),
-    prisma.enrollment.count({ where: { status: "ENROLLED" } }),
-  ]);
+  const courses = await prisma.course.findMany({
+    include: {
+      prerequisite: { select: { code: true } },
+      enrollments: { where: { status: "ENROLLED" }, select: { id: true } },
+    },
+    orderBy: [{ semester: "asc" }, { code: "asc" }],
+  });
 
-  return (
-    <LandingPortal
-      currentUser={currentUser}
-      demoUsers={demoUsers}
-      stats={{
-        courseCount,
-        enrollmentCount,
-        userCount: demoUsers.length,
-      }}
-    />
-  );
+  const nodes = courses.map((c) => ({
+    id: c.id,
+    code: c.code,
+    title: c.title,
+    credits: c.credits,
+    semester: c.semester,
+    maxSeats: c.maxSeats,
+    activeSeats: c.enrollments.length,
+    prerequisiteCode: c.prerequisite?.code ?? null,
+  }));
+
+  return <LandingPortal currentUser={currentUser} courses={nodes} />;
 }
 
 export default function HomePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#F4F7FB] text-sm font-medium text-[#003366]">
-          Loading UniTrack CMS...
+        <div className="flex min-h-screen items-center justify-center bg-[#002855] text-sm font-medium text-white">
+          Loading UniTrack 3D Experience...
         </div>
       }
     >

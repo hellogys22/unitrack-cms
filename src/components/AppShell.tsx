@@ -159,7 +159,8 @@ export function AppShell({
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
+    router.push("/login");
+    router.refresh();
   }
 
   const sidebarContent = (
