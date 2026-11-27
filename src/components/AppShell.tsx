@@ -17,6 +17,7 @@ import {
   PlusCircle,
   Search,
   ShieldCheck,
+  User,
   Users,
   X,
 } from "lucide-react";
@@ -42,7 +43,8 @@ export interface NavItem {
     | "catalog"
     | "enroll"
     | "users"
-    | "analytics";
+    | "analytics"
+    | "profile";
 }
 
 function getInitials(name: string): string {
@@ -74,6 +76,8 @@ function NavIcon({ kind }: { kind: NavItem["icon"] }) {
       return <Users className="h-4 w-4 shrink-0" />;
     case "analytics":
       return <ShieldCheck className="h-4 w-4 shrink-0" />;
+    case "profile":
+      return <User className="h-4 w-4 shrink-0" />;
   }
 }
 
@@ -225,7 +229,7 @@ export function AppShell({
             className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-sm font-medium text-blue-100/85 transition-colors hover:bg-white/10 hover:text-white"
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            <span>Switch Account / Logout</span>
+            <span>Logout</span>
           </button>
         </nav>
       </div>
@@ -233,12 +237,15 @@ export function AppShell({
       {/* Bottom Academic Footer */}
       <div className="border-t border-white/10 px-5 py-5 text-center">
         <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-blue-100">
-          <BookOpen className="h-5 w-5" />
+          <GraduationCap className="h-5 w-5" />
         </div>
         <p className="text-xs font-semibold text-white">
-          BCA Software Engineering
+          BCA • Amity University
         </p>
-        <p className="mt-0.5 text-[11px] text-blue-200/80">
+        <p className="text-[11px] text-blue-200/80">
+          Chhattisgarh
+        </p>
+        <p className="mt-1 text-[11px] font-medium text-blue-200/60">
           Learn • Build • Grow
         </p>
       </div>
